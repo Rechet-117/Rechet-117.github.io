@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>РњРѕСЏ РєРІР°СЂС‚РёСЂР°</title>
+<title>Моя квартира</title>
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--text:#202124;--muted:#74777c;--line:#e5e7eb;--accent:#2f6fed;--danger:#d64545;--ok:#27864a;--shadow:0 8px 28px rgba(30,35,40,.07)}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
@@ -28,65 +28,65 @@ button,.input,select{font:inherit}.btn{border:0;border-radius:10px;padding:9px 1
 <body>
 <div class="app">
 <aside class="side">
-  <div class="logo">рџЏ  РњРѕСЏ <span>РєРІР°СЂС‚РёСЂР°</span></div>
+  <div class="logo">🏠 Моя <span>квартира</span></div>
   <div class="nav">
-    <button data-page="home" class="active">рџЏ  Р“Р»Р°РІРЅР°СЏ</button>
-    <button data-page="tasks">рџ“ќ Р”РµР»Р°</button>
-    <button data-page="stock">рџ“¦ Р—Р°РїР°СЃС‹</button>
-    <button data-page="missing">вљ пёЏ Р§РµРіРѕ РЅРµ С…РІР°С‚Р°РµС‚</button>
-    <button data-page="reminders">вЏ° РќР°РїРѕРјРёРЅР°РЅРёСЏ</button>
-    <button data-page="categories">вљ™пёЏ РљР°С‚РµРіРѕСЂРёРё</button>
+    <button data-page="home" class="active">🏠 Главная</button>
+    <button data-page="tasks">📝 Дела</button>
+    <button data-page="stock">📦 Запасы</button>
+    <button data-page="missing">⚠️ Чего не хватает</button>
+    <button data-page="reminders">⏰ Напоминания</button>
+    <button data-page="categories">⚙️ Категории</button>
   </div>
 </aside>
 
 <main class="main">
-<div class="top"><div><h1 id="title">Р“Р»Р°РІРЅР°СЏ</h1><div class="date" id="today"></div></div></div>
+<div class="top"><div><h1 id="title">Главная</h1><div class="date" id="today"></div></div></div>
 
 <section id="home" class="page active">
   <div class="cards">
-    <div class="stat"><small>Р”РµР» РѕСЃС‚Р°Р»РѕСЃСЊ</small><b id="sTasks">0</b></div>
-    <div class="stat"><small>Р—Р°РїР°СЃРѕРІ</small><b id="sStock">0</b></div>
-    <div class="stat"><small>РќРµ С…РІР°С‚Р°РµС‚</small><b id="sMissing">0</b></div>
-    <div class="stat"><small>РќР°РїРѕРјРёРЅР°РЅРёР№</small><b id="sRem">0</b></div>
+    <div class="stat"><small>Дел осталось</small><b id="sTasks">0</b></div>
+    <div class="stat"><small>Запасов</small><b id="sStock">0</b></div>
+    <div class="stat"><small>Не хватает</small><b id="sMissing">0</b></div>
+    <div class="stat"><small>Напоминаний</small><b id="sRem">0</b></div>
   </div>
   <div class="grid">
-    <div class="card"><div class="between"><h2>вљ пёЏ РќСѓР¶РЅРѕ РєСѓРїРёС‚СЊ</h2><button class="btn" onclick="go('missing')">Р’СЃРµ</button></div><div id="homeMissing"></div></div>
-    <div class="card"><div class="between"><h2>вЏ° Р‘Р»РёР¶Р°Р№С€РёРµ РЅР°РїРѕРјРёРЅР°РЅРёСЏ</h2><button class="btn" onclick="go('reminders')">Р’СЃРµ</button></div><div id="homeRem"></div></div>
+    <div class="card"><div class="between"><h2>⚠️ Нужно купить</h2><button class="btn" onclick="go('missing')">Все</button></div><div id="homeMissing"></div></div>
+    <div class="card"><div class="between"><h2>⏰ Ближайшие напоминания</h2><button class="btn" onclick="go('reminders')">Все</button></div><div id="homeRem"></div></div>
   </div>
 </section>
 
 <section id="tasks" class="page">
-<div class="card"><div class="between"><h2>рџ“ќ Р”РѕРјР°С€РЅРёРµ РґРµР»Р°</h2></div>
-<div class="form two"><input id="taskName" class="input" placeholder="РќР°РїСЂРёРјРµСЂ: РїСЂРѕРїС‹Р»РµСЃРѕСЃРёС‚СЊ"><select id="taskCat"></select><button class="btn primary" onclick="addTask()">Р”РѕР±Р°РІРёС‚СЊ</button></div>
+<div class="card"><div class="between"><h2>📝 Домашние дела</h2></div>
+<div class="form two"><input id="taskName" class="input" placeholder="Например: пропылесосить"><select id="taskCat"></select><button class="btn primary" onclick="addTask()">Добавить</button></div>
 <div id="taskList"></div></div>
 </section>
 
 <section id="stock" class="page">
-<div class="card"><div class="between"><h2>рџ“¦ Р—Р°РїР°СЃС‹</h2><button class="btn primary" onclick="focusAdd()">пј‹ Р”РѕР±Р°РІРёС‚СЊ Р·Р°РїР°СЃ</button></div>
+<div class="card"><div class="between"><h2>📦 Запасы</h2><button class="btn primary" onclick="focusAdd()">＋ Добавить запас</button></div>
 <div class="form" id="stockForm">
-<input id="stockName" class="input wide" placeholder="Р§С‚Рѕ? РќР°РїСЂРёРјРµСЂ: РјРѕР»РѕРєРѕ">
+<input id="stockName" class="input wide" placeholder="Что? Например: молоко">
 <select id="stockCat"></select>
-<input id="stockQty" class="input" type="number" min="0" step="0.01" placeholder="РљРѕР»РёС‡РµСЃС‚РІРѕ">
-<select id="stockUnit"><option>С€С‚.</option><option>Рі</option><option>РєРі</option><option>РјР»</option><option>Р»</option></select>
-<button class="btn primary" onclick="addStock()">Р”РѕР±Р°РІРёС‚СЊ</button>
+<input id="stockQty" class="input" type="number" min="0" step="0.01" placeholder="Количество">
+<select id="stockUnit"><option>шт.</option><option>г</option><option>кг</option><option>мл</option><option>л</option></select>
+<button class="btn primary" onclick="addStock()">Добавить</button>
 </div>
-<div class="meta" style="margin-bottom:12px">РњРёРЅРёРјСѓРј Р·Р°РґР°С‘С‚СЃСЏ РїРѕСЃР»Рµ РґРѕР±Р°РІР»РµРЅРёСЏ. РљРѕРіРґР° Р·Р°РїР°СЃ РЅРёР¶Рµ РјРёРЅРёРјСѓРјР°, РѕРЅ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РїРѕСЏРІР»СЏРµС‚СЃСЏ РІ В«Р§РµРіРѕ РЅРµ С…РІР°С‚Р°РµС‚В».</div>
+<div class="meta" style="margin-bottom:12px">Минимум задаётся после добавления. Когда запас ниже минимума, он автоматически появляется в «Чего не хватает».</div>
 <div id="stockList"></div></div>
 </section>
 
 <section id="missing" class="page">
-<div class="card"><h2>вљ пёЏ Р§РµРіРѕ РЅРµ С…РІР°С‚Р°РµС‚</h2><div id="missingList"></div></div>
+<div class="card"><h2>⚠️ Чего не хватает</h2><div id="missingList"></div></div>
 </section>
 
 <section id="reminders" class="page">
-<div class="card"><h2>вЏ° РќР°РїРѕРјРёРЅР°РЅРёСЏ</h2>
-<div class="form rem"><input id="remText" class="input" placeholder="РќР°РїСЂРёРјРµСЂ: РєСѓРїРёС‚СЊ РєРѕСЂРј"><input id="remDate" class="input" type="datetime-local"><select id="remRepeat"><option value="once">РћРґРёРЅ СЂР°Р·</option><option value="daily">РљР°Р¶РґС‹Р№ РґРµРЅСЊ</option><option value="weekly">РљР°Р¶РґСѓСЋ РЅРµРґРµР»СЋ</option></select><button class="btn primary" onclick="addReminder()">Р”РѕР±Р°РІРёС‚СЊ</button></div>
+<div class="card"><h2>⏰ Напоминания</h2>
+<div class="form rem"><input id="remText" class="input" placeholder="Например: купить корм"><input id="remDate" class="input" type="datetime-local"><select id="remRepeat"><option value="once">Один раз</option><option value="daily">Каждый день</option><option value="weekly">Каждую неделю</option></select><button class="btn primary" onclick="addReminder()">Добавить</button></div>
 <div id="remList"></div></div>
 </section>
 
 <section id="categories" class="page">
-<div class="card"><h2>вљ™пёЏ РњРѕРё РєР°С‚РµРіРѕСЂРёРё</h2>
-<div class="form two"><input id="catName" class="input" placeholder="РќРѕРІР°СЏ РєР°С‚РµРіРѕСЂРёСЏ"><span></span><button class="btn primary" onclick="addCategory()">Р”РѕР±Р°РІРёС‚СЊ</button></div>
+<div class="card"><h2>⚙️ Мои категории</h2>
+<div class="form two"><input id="catName" class="input" placeholder="Новая категория"><span></span><button class="btn primary" onclick="addCategory()">Добавить</button></div>
 <div id="catList"></div></div>
 </section>
 </main></div>
@@ -94,14 +94,14 @@ button,.input,select{font:inherit}.btn{border:0;border-radius:10px;padding:9px 1
 <script>
 const KEY='apartment_v1';
 let db=JSON.parse(localStorage.getItem(KEY)||'null')||{
-categories:['РџСЂРѕРґСѓРєС‚С‹','Р‘С‹С‚РѕРІР°СЏ С…РёРјРёСЏ','Р’Р°РЅРЅР°СЏ','РљСѓС…РЅСЏ','РЎРїР°Р»СЊРЅСЏ','Р”СЂСѓРіРѕРµ'],
-tasks:[{id:1,name:'РЈР±СЂР°С‚СЊ РєСѓС…РЅСЋ',cat:'РљСѓС…РЅСЏ',done:false},{id:2,name:'РџРѕСЃС‚РёСЂР°С‚СЊ Р±РµР»СЊС‘',cat:'РЎРїР°Р»СЊРЅСЏ',done:false}],
-stock:[{id:1,name:'РњРѕР»РѕРєРѕ',cat:'РџСЂРѕРґСѓРєС‚С‹',qty:1.5,min:1,unit:'Р»'},{id:2,name:'РЇР№С†Р°',cat:'РџСЂРѕРґСѓРєС‚С‹',qty:4,min:6,unit:'С€С‚.'},{id:3,name:'Р РёСЃ',cat:'РџСЂРѕРґСѓРєС‚С‹',qty:700,min:500,unit:'Рі'},{id:4,name:'РўСѓР°Р»РµС‚РЅР°СЏ Р±СѓРјР°РіР°',cat:'Р’Р°РЅРЅР°СЏ',qty:8,min:4,unit:'С€С‚.'}],
+categories:['Продукты','Бытовая химия','Ванная','Кухня','Спальня','Другое'],
+tasks:[{id:1,name:'Убрать кухню',cat:'Кухня',done:false},{id:2,name:'Постирать бельё',cat:'Спальня',done:false}],
+stock:[{id:1,name:'Молоко',cat:'Продукты',qty:1.5,min:1,unit:'л'},{id:2,name:'Яйца',cat:'Продукты',qty:4,min:6,unit:'шт.'},{id:3,name:'Рис',cat:'Продукты',qty:700,min:500,unit:'г'},{id:4,name:'Туалетная бумага',cat:'Ванная',qty:8,min:4,unit:'шт.'}],
 reminders:[]
 };
 function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
 function id(){return Date.now()+Math.random()}
-function go(page){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(page).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));let names={home:'Р“Р»Р°РІРЅР°СЏ',tasks:'Р”РµР»Р°',stock:'Р—Р°РїР°СЃС‹',missing:'Р§РµРіРѕ РЅРµ С…РІР°С‚Р°РµС‚',reminders:'РќР°РїРѕРјРёРЅР°РЅРёСЏ',categories:'РљР°С‚РµРіРѕСЂРёРё'};document.getElementById('title').textContent=names[page]}
+function go(page){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(page).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));let names={home:'Главная',tasks:'Дела',stock:'Запасы',missing:'Чего не хватает',reminders:'Напоминания',categories:'Категории'};document.getElementById('title').textContent=names[page]}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
 function opts(selected){return db.categories.map(c=>`<option ${c===selected?'selected':''}>${esc(c)}</option>`).join('')}
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
@@ -116,21 +116,21 @@ function delStock(i){db.stock.splice(i,1);save()}
 function addReminder(){let t=remText.value.trim(),d=remDate.value;if(!t||!d)return;db.reminders.push({id:id(),text:t,date:d,repeat:remRepeat.value,done:false});remText.value='';remDate.value='';save()}
 function delReminder(i){db.reminders.splice(i,1);save()}
 function addCategory(){let n=catName.value.trim();if(!n||db.categories.includes(n))return;db.categories.push(n);catName.value='';save()}
-function renameCat(i){let n=prompt('РќРѕРІРѕРµ РЅР°Р·РІР°РЅРёРµ РєР°С‚РµРіРѕСЂРёРё:',db.categories[i]);if(!n||n===db.categories[i])return;let old=db.categories[i];db.categories[i]=n;db.tasks.forEach(x=>{if(x.cat===old)x.cat=n});db.stock.forEach(x=>{if(x.cat===old)x.cat=n});save()}
-function delCat(i){if(db.categories.length<=1){alert('Р”РѕР»Р¶РЅР° РѕСЃС‚Р°С‚СЊСЃСЏ С…РѕС‚СЏ Р±С‹ РѕРґРЅР° РєР°С‚РµРіРѕСЂРёСЏ.');return}let c=db.categories[i];if(!confirm('РЈРґР°Р»РёС‚СЊ РєР°С‚РµРіРѕСЂРёСЋ В«'+c+'В»? РўРѕРІР°СЂС‹ Рё РґРµР»Р° РѕСЃС‚Р°РЅСѓС‚СЃСЏ, РЅРѕ РїРѕР»СѓС‡Р°С‚ РєР°С‚РµРіРѕСЂРёСЋ В«Р”СЂСѓРіРѕРµВ» (РµСЃР»Рё РѕРЅР° РµСЃС‚СЊ).'))return;let fallback=db.categories.find(x=>x==='Р”СЂСѓРіРѕРµ')||db.categories.find((_,j)=>j!==i);db.categories.splice(i,1);db.tasks.forEach(x=>{if(x.cat===c)x.cat=fallback});db.stock.forEach(x=>{if(x.cat===c)x.cat=fallback});save()}
+function renameCat(i){let n=prompt('Новое название категории:',db.categories[i]);if(!n||n===db.categories[i])return;let old=db.categories[i];db.categories[i]=n;db.tasks.forEach(x=>{if(x.cat===old)x.cat=n});db.stock.forEach(x=>{if(x.cat===old)x.cat=n});save()}
+function delCat(i){if(db.categories.length<=1){alert('Должна остаться хотя бы одна категория.');return}let c=db.categories[i];if(!confirm('Удалить категорию «'+c+'»? Товары и дела останутся, но получат категорию «Другое» (если она есть).'))return;let fallback=db.categories.find(x=>x==='Другое')||db.categories.find((_,j)=>j!==i);db.categories.splice(i,1);db.tasks.forEach(x=>{if(x.cat===c)x.cat=fallback});db.stock.forEach(x=>{if(x.cat===c)x.cat=fallback});save()}
 function focusAdd(){go('stock');stockName.focus()}
 function fmtDate(d){return new Date(d).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
 function render(){
 today.textContent=new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
 taskCat.innerHTML=opts(taskCat.value||db.categories[0]);stockCat.innerHTML=opts(stockCat.value||db.categories[0]);
 sTasks.textContent=db.tasks.filter(x=>!x.done).length;sStock.textContent=db.stock.length;sMissing.textContent=missing().length;sRem.textContent=db.reminders.filter(x=>!x.done).length;
-taskList.innerHTML=db.tasks.length?db.tasks.map((x,i)=>`<div class="item"><div><input type="checkbox" ${x.done?'checked':''} onchange="toggleTask(${i})"> <span class="${x.done?'check':''}">${esc(x.name)}</span><div class="meta">${esc(x.cat)}</div></div><button class="btn danger small" onclick="delTask(${i})">РЈРґР°Р»РёС‚СЊ</button></div>`).join(''):'<div class="empty">Р”РµР» РїРѕРєР° РЅРµС‚.</div>';
-stockList.innerHTML=db.stock.length?db.stock.map((x,i)=>{let bad=Number(x.qty)<Number(x.min);return `<div class="item"><div style="flex:1"><b>${esc(x.name)}</b><div class="meta">${esc(x.cat)} В· РјРёРЅРёРјСѓРј <input style="width:80px" class="input" type="number" min="0" step=".01" value="${x.min}" onchange="setMin(${i},this.value)"> ${esc(x.unit)}</div></div><div class="qty"><button class="btn small" onclick="changeQty(${i},-${x.unit==='С€С‚.'?1:(x.unit==='РєРі'||x.unit==='Р»'?0.1:50)})">в€’</button><strong>${x.qty} ${esc(x.unit)}</strong><button class="btn small" onclick="changeQty(${i},${x.unit==='С€С‚.'?1:(x.unit==='РєРі'||x.unit==='Р»'?0.1:50)})">пј‹</button><span class="badge ${bad?'bad':'good'}">${bad?'РќРµ С…РІР°С‚Р°РµС‚':'Р•СЃС‚СЊ'}</span><button class="btn danger small" onclick="delStock(${i})">Г—</button></div></div>`}).join(''):'<div class="empty">Р—Р°РїР°СЃРѕРІ РїРѕРєР° РЅРµС‚.</div>';
-let m=missing();missingList.innerHTML=m.length?m.map(x=>`<div class="item"><div><b>${esc(x.name)}</b><div class="meta">${esc(x.cat)} В· РѕСЃС‚Р°Р»РѕСЃСЊ ${x.qty} ${esc(x.unit)}, РЅСѓР¶РЅРѕ РјРёРЅРёРјСѓРј ${x.min} ${esc(x.unit)}</div></div><button class="btn primary" onclick="go('stock')">РџРѕРїРѕР»РЅРёС‚СЊ</button></div>`).join(''):'<div class="empty">рџЋ‰ Р’СЃС‘ РЅРµРѕР±С…РѕРґРёРјРѕРµ РµСЃС‚СЊ РґРѕРјР°.</div>';
-homeMissing.innerHTML=m.length?m.slice(0,5).map(x=>`<div class="item"><div><b>${esc(x.name)}</b><div class="meta">${x.qty} ${esc(x.unit)} РёР· ${x.min} ${esc(x.unit)} РјРёРЅРёРјСѓРј</div></div><span class="badge bad">РљСѓРїРёС‚СЊ</span></div>`).join(''):'<div class="empty">Р’СЃС‘ РІ РїРѕСЂСЏРґРєРµ рџЋ‰</div>';
-let rs=db.reminders.filter(x=>!x.done).sort((a,b)=>new Date(a.date)-new Date(b.date));homeRem.innerHTML=rs.length?rs.slice(0,4).map(x=>`<div class="item"><div><b>${esc(x.text)}</b><div class="meta">${fmtDate(x.date)} В· ${x.repeat==='once'?'РѕРґРёРЅ СЂР°Р·':x.repeat==='daily'?'РєР°Р¶РґС‹Р№ РґРµРЅСЊ':'РєР°Р¶РґСѓСЋ РЅРµРґРµР»СЋ'}</div></div></div>`).join(''):'<div class="empty">РќР°РїРѕРјРёРЅР°РЅРёР№ РЅРµС‚.</div>';
-remList.innerHTML=db.reminders.length?rs.map((x)=>{let i=db.reminders.indexOf(x);return `<div class="item"><div><b>${esc(x.text)}</b><div class="meta">${fmtDate(x.date)} В· ${x.repeat==='once'?'РѕРґРёРЅ СЂР°Р·':x.repeat==='daily'?'РєР°Р¶РґС‹Р№ РґРµРЅСЊ':'РєР°Р¶РґСѓСЋ РЅРµРґРµР»СЋ'}</div></div><button class="btn danger small" onclick="delReminder(${i})">РЈРґР°Р»РёС‚СЊ</button></div>`}).join(''):'<div class="empty">РќР°РїРѕРјРёРЅР°РЅРёР№ РїРѕРєР° РЅРµС‚.</div>';
-catList.innerHTML=db.categories.map((c,i)=>`<div class="item"><b>${esc(c)}</b><div class="row"><button class="btn small" onclick="renameCat(${i})">РџРµСЂРµРёРјРµРЅРѕРІР°С‚СЊ</button><button class="btn danger small" onclick="delCat(${i})">РЈРґР°Р»РёС‚СЊ</button></div></div>`).join('');
+taskList.innerHTML=db.tasks.length?db.tasks.map((x,i)=>`<div class="item"><div><input type="checkbox" ${x.done?'checked':''} onchange="toggleTask(${i})"> <span class="${x.done?'check':''}">${esc(x.name)}</span><div class="meta">${esc(x.cat)}</div></div><button class="btn danger small" onclick="delTask(${i})">Удалить</button></div>`).join(''):'<div class="empty">Дел пока нет.</div>';
+stockList.innerHTML=db.stock.length?db.stock.map((x,i)=>{let bad=Number(x.qty)<Number(x.min);return `<div class="item"><div style="flex:1"><b>${esc(x.name)}</b><div class="meta">${esc(x.cat)} · минимум <input style="width:80px" class="input" type="number" min="0" step=".01" value="${x.min}" onchange="setMin(${i},this.value)"> ${esc(x.unit)}</div></div><div class="qty"><button class="btn small" onclick="changeQty(${i},-${x.unit==='шт.'?1:(x.unit==='кг'||x.unit==='л'?0.1:50)})">−</button><strong>${x.qty} ${esc(x.unit)}</strong><button class="btn small" onclick="changeQty(${i},${x.unit==='шт.'?1:(x.unit==='кг'||x.unit==='л'?0.1:50)})">＋</button><span class="badge ${bad?'bad':'good'}">${bad?'Не хватает':'Есть'}</span><button class="btn danger small" onclick="delStock(${i})">×</button></div></div>`}).join(''):'<div class="empty">Запасов пока нет.</div>';
+let m=missing();missingList.innerHTML=m.length?m.map(x=>`<div class="item"><div><b>${esc(x.name)}</b><div class="meta">${esc(x.cat)} · осталось ${x.qty} ${esc(x.unit)}, нужно минимум ${x.min} ${esc(x.unit)}</div></div><button class="btn primary" onclick="go('stock')">Пополнить</button></div>`).join(''):'<div class="empty">🎉 Всё необходимое есть дома.</div>';
+homeMissing.innerHTML=m.length?m.slice(0,5).map(x=>`<div class="item"><div><b>${esc(x.name)}</b><div class="meta">${x.qty} ${esc(x.unit)} из ${x.min} ${esc(x.unit)} минимум</div></div><span class="badge bad">Купить</span></div>`).join(''):'<div class="empty">Всё в порядке 🎉</div>';
+let rs=db.reminders.filter(x=>!x.done).sort((a,b)=>new Date(a.date)-new Date(b.date));homeRem.innerHTML=rs.length?rs.slice(0,4).map(x=>`<div class="item"><div><b>${esc(x.text)}</b><div class="meta">${fmtDate(x.date)} · ${x.repeat==='once'?'один раз':x.repeat==='daily'?'каждый день':'каждую неделю'}</div></div></div>`).join(''):'<div class="empty">Напоминаний нет.</div>';
+remList.innerHTML=db.reminders.length?rs.map((x)=>{let i=db.reminders.indexOf(x);return `<div class="item"><div><b>${esc(x.text)}</b><div class="meta">${fmtDate(x.date)} · ${x.repeat==='once'?'один раз':x.repeat==='daily'?'каждый день':'каждую неделю'}</div></div><button class="btn danger small" onclick="delReminder(${i})">Удалить</button></div>`}).join(''):'<div class="empty">Напоминаний пока нет.</div>';
+catList.innerHTML=db.categories.map((c,i)=>`<div class="item"><b>${esc(c)}</b><div class="row"><button class="btn small" onclick="renameCat(${i})">Переименовать</button><button class="btn danger small" onclick="delCat(${i})">Удалить</button></div></div>`).join('');
 }
 render();
 </script>
