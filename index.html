@@ -1,4 +1,3 @@
-<!doctype html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -23,6 +22,9 @@ button,.input,select{font:inherit}.btn{border:0;border-radius:10px;padding:9px 1
 .notice{background:#fff8e8;border:1px solid #f5dfab;border-radius:12px;padding:12px 14px;margin-bottom:16px}
 @media(max-width:900px){.side{width:190px}.main{margin-left:190px;padding:20px}.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.form,.form.rem{grid-template-columns:1fr 1fr}.form .wide{grid-column:1/-1}}
 @media(max-width:600px){.side{position:static;width:100%;height:auto;border-right:0;border-bottom:1px solid var(--line)}.app{display:block}.main{margin:0;padding:15px}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap}.logo{padding-bottom:12px}.cards{grid-template-columns:1fr 1fr}.form,.form.rem{grid-template-columns:1fr}.top{display:block}.top .date{margin-top:5px}}
+
+[hidden]{display:none!important}.between{flex-wrap:wrap;margin-bottom:16px}.between h2{margin:0}.stock-form{padding:16px;background:#f7f8fa;border-radius:12px;grid-template-columns:repeat(2,minmax(0,1fr))}.stock-form label{font-size:13px;display:grid;gap:6px}.voice-panel{border:1px solid var(--line);padding:16px;border-radius:14px;margin-bottom:20px}.voice-panel p{color:var(--muted);font-size:14px;line-height:1.5}.voice-panel .row{flex-wrap:wrap}.voice-panel input{flex:1;min-width:150px}.feedback{white-space:pre-line;line-height:1.6;margin-top:12px}.btn:focus-visible{outline:3px solid #9ab5f5;outline-offset:2px}.item>div{min-width:0;overflow-wrap:anywhere}.btn{min-height:44px}.qty{flex-wrap:wrap}.local-note{font-size:13px;color:var(--muted);margin-bottom:20px}
+@media(max-width:600px){.side{padding:12px}.nav button{width:auto;flex-shrink:0;min-height:44px}.item{align-items:flex-start;flex-wrap:wrap}.qty{width:100%;justify-content:flex-start}.stock-form{grid-template-columns:1fr}.form.two{grid-template-columns:1fr}.card{padding:16px}.main{padding-bottom:calc(20px + env(safe-area-inset-bottom))}.top h1{font-size:26px}}
 </style>
 </head>
 <body>
@@ -42,6 +44,7 @@ button,.input,select{font:inherit}.btn{border:0;border-radius:10px;padding:9px 1
 <main class="main">
 <div class="top"><div><h1 id="title">Главная</h1><div class="date" id="today"></div></div></div>
 
+<div class="local-note">Пробная версия · данные пока сохраняются только в этом браузере</div>
 <section id="home" class="page active">
   <div class="cards">
     <div class="stat"><small>Дел осталось</small><b id="sTasks">0</b></div>
@@ -63,14 +66,22 @@ button,.input,select{font:inherit}.btn{border:0;border-radius:10px;padding:9px 1
 
 <section id="stock" class="page">
 <div class="card"><div class="between"><h2>📦 Запасы</h2><button class="btn primary" onclick="focusAdd()">＋ Добавить запас</button></div>
-<div class="form" id="stockForm">
-<input id="stockName" class="input wide" placeholder="Что? Например: молоко">
-<select id="stockCat"></select>
-<input id="stockQty" class="input" type="number" min="0" step="0.01" placeholder="Количество">
-<select id="stockUnit"><option>шт.</option><option>г</option><option>кг</option><option>мл</option><option>л</option></select>
-<button class="btn primary" onclick="addStock()">Добавить</button>
+<div class="voice-panel">
+<div class="row"><button id="voiceButton" class="btn" onclick="startVoice()">🎙️ Произнести команду</button><button id="stopVoice" class="btn" hidden onclick="recognition.stop()">Остановить</button></div>
+<p>Например: «минус два яйца», «плюс литр молока». Можно надиктовать команду микрофоном клавиатуры в поле ниже</p>
+<div class="row"><input id="commandText" class="input" aria-label="Команда для запасов" placeholder="Минус два яйца"><button class="btn" onclick="previewCommand()">Проверить</button></div>
+<div id="voiceFeedback" class="feedback" role="status" aria-live="polite"></div>
+<div class="row" style="margin-top:12px"><button id="applyVoice" class="btn primary" hidden onclick="applyCommand()">Применить</button><button id="undoVoice" class="btn" hidden onclick="undoCommand()">Отменить изменение</button></div>
 </div>
-<div class="meta" style="margin-bottom:12px">Минимум задаётся после добавления. Когда запас ниже минимума, он автоматически появляется в «Чего не хватает».</div>
+<form class="form stock-form" id="stockForm" hidden onsubmit="event.preventDefault();addStock()">
+<label class="wide">Название<input id="stockName" class="input" required placeholder="Например: молоко"></label>
+<label>Категория<select id="stockCat"></select></label>
+<label>Количество<input id="stockQty" class="input" type="number" min="0" step="0.01" required></label>
+<label>Единица<select id="stockUnit"><option>шт.</option><option>г</option><option>кг</option><option>мл</option><option>л</option></select></label>
+<label>Минимум<input id="stockMin" class="input" type="number" min="0" step="0.01" value="0" required></label>
+<div class="row wide"><button class="btn primary" type="submit">Добавить</button><button class="btn" type="button" onclick="stockForm.hidden=true">Закрыть</button></div>
+</form>
+<div class="meta" style="margin-bottom:12px">Запасы ниже минимума автоматически появляются в «Чего не хватает»</div>
 <div id="stockList"></div></div>
 </section>
 
@@ -109,7 +120,7 @@ function missing(){return db.stock.filter(x=>Number(x.qty)<Number(x.min))}
 function addTask(){let n=taskName.value.trim();if(!n)return;db.tasks.push({id:id(),name:n,cat:taskCat.value,done:false});taskName.value='';save()}
 function toggleTask(i){db.tasks[i].done=!db.tasks[i].done;save()}
 function delTask(i){db.tasks.splice(i,1);save()}
-function addStock(){let n=stockName.value.trim(),q=Number(stockQty.value);if(!n||isNaN(q))return;db.stock.push({id:id(),name:n,cat:stockCat.value,qty:q,min:0,unit:stockUnit.value});stockName.value='';stockQty.value='';save()}
+function addStock(){let n=stockName.value.trim(),q=Number(stockQty.value);if(!n||!Number.isFinite(q)||q<0||stockQty.value==='')return;let m=Number(stockMin.value);if(!Number.isFinite(m)||m<0)return;db.stock.push({id:id(),name:n,cat:stockCat.value,qty:q,min:m,unit:stockUnit.value});stockName.value='';stockQty.value='';stockMin.value='0';stockForm.hidden=true;save()}
 function changeQty(i,d){db.stock[i].qty=Math.max(0,Number((db.stock[i].qty+d).toFixed(2)));save()}
 function setMin(i,v){db.stock[i].min=Math.max(0,Number(v));save()}
 function delStock(i){db.stock.splice(i,1);save()}
@@ -118,7 +129,7 @@ function delReminder(i){db.reminders.splice(i,1);save()}
 function addCategory(){let n=catName.value.trim();if(!n||db.categories.includes(n))return;db.categories.push(n);catName.value='';save()}
 function renameCat(i){let n=prompt('Новое название категории:',db.categories[i]);if(!n||n===db.categories[i])return;let old=db.categories[i];db.categories[i]=n;db.tasks.forEach(x=>{if(x.cat===old)x.cat=n});db.stock.forEach(x=>{if(x.cat===old)x.cat=n});save()}
 function delCat(i){if(db.categories.length<=1){alert('Должна остаться хотя бы одна категория.');return}let c=db.categories[i];if(!confirm('Удалить категорию «'+c+'»? Товары и дела останутся, но получат категорию «Другое» (если она есть).'))return;let fallback=db.categories.find(x=>x==='Другое')||db.categories.find((_,j)=>j!==i);db.categories.splice(i,1);db.tasks.forEach(x=>{if(x.cat===c)x.cat=fallback});db.stock.forEach(x=>{if(x.cat===c)x.cat=fallback});save()}
-function focusAdd(){go('stock');stockName.focus()}
+function focusAdd(){go('stock');stockForm.hidden=false;stockName.focus()}
 function fmtDate(d){return new Date(d).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
 function render(){
 today.textContent=new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
@@ -132,6 +143,37 @@ let rs=db.reminders.filter(x=>!x.done).sort((a,b)=>new Date(a.date)-new Date(b.d
 remList.innerHTML=db.reminders.length?rs.map((x)=>{let i=db.reminders.indexOf(x);return `<div class="item"><div><b>${esc(x.text)}</b><div class="meta">${fmtDate(x.date)} · ${x.repeat==='once'?'один раз':x.repeat==='daily'?'каждый день':'каждую неделю'}</div></div><button class="btn danger small" onclick="delReminder(${i})">Удалить</button></div>`}).join(''):'<div class="empty">Напоминаний пока нет.</div>';
 catList.innerHTML=db.categories.map((c,i)=>`<div class="item"><b>${esc(c)}</b><div class="row"><button class="btn small" onclick="renameCat(${i})">Переименовать</button><button class="btn danger small" onclick="delCat(${i})">Удалить</button></div></div>`).join('');
 }
+
+let recognition=null,pendingCommand=null,lastChange=null;
+const SpeechAPI=window.SpeechRecognition||window.webkitSpeechRecognition;
+function normalize(s){return s.toLowerCase().replace(/ё/g,'е').replace(/[.,!?;:]/g,' ').replace(/\s+/g,' ').trim()}
+const numberWords={ноль:0,один:1,одна:1,одно:1,два:2,две:2,три:3,четыре:4,пять:5,шесть:6,семь:7,восемь:8,девять:9,десять:10,пол:0.5,половина:0.5};
+function productKey(s){s=normalize(s);const aliases={яйцо:'яйца',яиц:'яйца',яйца:'яйца',молока:'молоко',сахара:'сахар',риса:'рис',тушенки:'тушенка'};return s.split(' ').map(w=>aliases[w]||w).join(' ')}
+function parseCommand(text,stock){
+let t=normalize(text.replace(/(\d),(\d)/g,'$1.$2'));
+// Keep decimal quantities before punctuation normalization.
+t= text.toLowerCase().replace(/ё/g,'е').replace(/(\d),(\d)/g,'$1.$2').replace(/[!?;:]/g,'').replace(/\s+/g,' ').trim();
+let action=t.match(/^(минус|убери|убрать|вычти|плюс|добавь|добавить)\s+/);if(!action)throw Error('Начните команду с «плюс» или «минус»');
+const sign=/^(минус|убери|убрать|вычти)$/.test(action[1])?-1:1;t=t.slice(action[0].length);
+let quantity=1;let n=t.match(/^(\d+(?:\.\d+)?|ноль|один|одна|одно|два|две|три|четыре|пять|шесть|семь|восемь|девять|десять|половина|пол)(?:\s+|(?=литра|килограмма))/);
+if(n){quantity=numberWords[n[1]]??Number(n[1]);t=t.slice(n[0].length)}
+if(!(quantity>0))throw Error('Количество должно быть больше нуля');
+let unit=null;let u=t.match(/^(килограмм(?:а|ов)?|кг|грамм(?:а|ов)?|г|миллилитр(?:а|ов)?|мл|литр(?:а|ов)?|л|банк(?:а|и|у|ок)|штук(?:а|и)?|шт\.?|упаковк(?:а|и|у|ок))\s+/);
+if(u){let w=u[1];unit=/^(килограмм|кг)/.test(w)?'кг':/^(грамм|г$)/.test(w)?'г':/^(миллилитр|мл)/.test(w)?'мл':/^(литр|л$)/.test(w)?'л':'шт.';t=t.slice(u[0].length)}
+const key=productKey(t);let matches=stock.filter(x=>productKey(x.name)===key);
+if(matches.length!==1)throw Error(matches.length?'Найдено несколько запасов с этим названием. Измените количество вручную':'Продукт не найден. Сначала добавьте его в запасы');
+const x=matches[0];unit=unit||x.unit;const factors={г:1,кг:1000,мл:1,л:1000,'шт.':1};const group=u=>['г','кг'].includes(u)?'mass':['мл','л'].includes(u)?'volume':'count';
+if(group(unit)!==group(x.unit))throw Error('Единица команды не совпадает с единицей запаса');
+const delta=quantity*factors[unit]/factors[x.unit]*sign;const next=Number((Number(x.qty)+delta).toFixed(2));if(next<0)throw Error('В запасах меньше указанного количества. Уточните команду');
+return {id:x.id,before:Number(x.qty),after:next,name:x.name,unit:x.unit};
+}
+function previewCommand(){pendingCommand=null;applyVoice.hidden=true;try{pendingCommand=parseCommand(commandText.value,db.stock);voiceFeedback.textContent=pendingCommand.name+': '+pendingCommand.before+' → '+pendingCommand.after+' '+pendingCommand.unit;applyVoice.hidden=false}catch(e){voiceFeedback.textContent=e.message}}
+commandText.addEventListener('input',()=>{pendingCommand=null;applyVoice.hidden=true});
+commandText.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();previewCommand()}});
+function applyCommand(){if(!pendingCommand)return;const x=db.stock.find(x=>x.id===pendingCommand.id);if(!x||Number(x.qty)!==pendingCommand.before){voiceFeedback.textContent='Запас изменился. Проверьте команду ещё раз';applyVoice.hidden=true;pendingCommand=null;return}lastChange={...pendingCommand};x.qty=pendingCommand.after;save();voiceFeedback.textContent='Сохранено: '+x.name+' – '+x.qty+' '+x.unit;pendingCommand=null;applyVoice.hidden=true;undoVoice.hidden=false}
+function undoCommand(){if(!lastChange)return;const x=db.stock.find(x=>x.id===lastChange.id);if(!x||Number(x.qty)!==lastChange.after){voiceFeedback.textContent='Запас уже изменился. Автоматическая отмена недоступна'}else{x.qty=lastChange.before;save();voiceFeedback.textContent='Изменение отменено'}lastChange=null;undoVoice.hidden=true}
+function startVoice(){if(!SpeechAPI){voiceFeedback.textContent='Браузер не поддерживает голосовой ввод сайта. Используйте микрофон клавиатуры в поле команды';return}if(!window.isSecureContext){voiceFeedback.textContent='Для голосового ввода откройте сайт по HTTPS';return}pendingCommand=null;applyVoice.hidden=true;recognition=new SpeechAPI();recognition.lang='ru-RU';recognition.interimResults=false;recognition.continuous=false;recognition.onstart=()=>{voiceButton.disabled=true;stopVoice.hidden=false;voiceFeedback.textContent='Слушаю…'};recognition.onresult=e=>{commandText.value=e.results[0][0].transcript;previewCommand()};recognition.onerror=e=>{voiceFeedback.textContent=({ 'not-allowed':'Разрешите доступ к микрофону в настройках браузера','no-speech':'Речь не услышана. Попробуйте ещё раз',network:'Распознавание недоступно. Проверьте интернет или используйте микрофон клавиатуры'})[e.error]||'Не удалось распознать речь. Попробуйте ввод через клавиатуру'};recognition.onend=()=>{voiceButton.disabled=false;stopVoice.hidden=true};try{recognition.start()}catch(e){voiceFeedback.textContent='Не удалось включить микрофон';voiceButton.disabled=false;stopVoice.hidden=true}}
+if(!SpeechAPI)voiceFeedback.textContent='Голос сайта недоступен в этом браузере. Можно использовать микрофон клавиатуры';
 render();
 </script>
 </body>
