@@ -25,6 +25,24 @@ button,.input,select{font:inherit}.btn{border:0;border-radius:10px;padding:9px 1
 
 [hidden]{display:none!important}.between{flex-wrap:wrap;margin-bottom:16px}.between h2{margin:0}.stock-form{padding:16px;background:#f7f8fa;border-radius:12px;grid-template-columns:repeat(2,minmax(0,1fr))}.stock-form label{font-size:13px;display:grid;gap:6px}.voice-panel{border:1px solid var(--line);padding:16px;border-radius:14px;margin-bottom:20px}.voice-panel p{color:var(--muted);font-size:14px;line-height:1.5}.voice-panel .row{flex-wrap:wrap}.voice-panel input{flex:1;min-width:150px}.feedback{white-space:pre-line;line-height:1.6;margin-top:12px}.btn:focus-visible{outline:3px solid #9ab5f5;outline-offset:2px}.item>div{min-width:0;overflow-wrap:anywhere}.btn{min-height:44px}.qty{flex-wrap:wrap}.local-note{font-size:13px;color:var(--muted);margin-bottom:20px}
 @media(max-width:600px){.side{padding:12px}.nav button{width:auto;flex-shrink:0;min-height:44px}.item{align-items:flex-start;flex-wrap:wrap}.qty{width:100%;justify-content:flex-start}.stock-form{grid-template-columns:1fr}.form.two{grid-template-columns:1fr}.card{padding:16px}.main{padding-bottom:calc(20px + env(safe-area-inset-bottom))}.top h1{font-size:26px}}
+
+/* Stable controls on phone screens: text wraps, action columns stay fixed. */
+@media(max-width:600px){
+#taskList .item,#remList .item,#missingList .item{display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:12px;align-items:center}
+#taskList .item>.btn,#remList .item>.btn,#missingList .item>.btn{width:96px;white-space:nowrap;justify-self:end;align-self:center}
+#taskList .item>div,#remList .item>div,#missingList .item>div{min-width:0;overflow-wrap:anywhere}
+#taskList input[type=checkbox]{width:18px;height:18px;vertical-align:middle}
+#stockList .item{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+#stockList .qty{display:grid;grid-template-columns:44px minmax(0,1fr) 44px 44px;gap:8px;width:100%;align-items:center}
+#stockList .qty>.btn{width:44px;height:44px;padding:0}
+#stockList .qty>strong{min-width:0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#stockList .qty>.badge{grid-column:1/-1;grid-row:2;justify-self:start}
+#stockList .qty>.btn:last-child{grid-column:4;grid-row:1}
+#catList .item{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+#catList .item>.row{display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:8px;width:100%}
+#catList .row>.btn{width:100%}
+#cloudStatus{min-height:3.2em}
+}
 </style>
 </head>
 <body>
