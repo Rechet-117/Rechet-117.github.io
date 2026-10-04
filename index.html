@@ -1,437 +1,138 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<title>Uber</title>
-	<link rel="shortcut icon" href="icons/favicon.ico" type="image/x-icon">
-	<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700&amp;subset=cyrillic-ext" rel="stylesheet">
-	<link rel="stylesheet" href="css/bootstrap-reboot.min.css">
-	<link rel="stylesheet" href="css/bootstrap-grid.min.css">
-	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
-	<link rel="stylesheet" href="css/style.min.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>РњРѕСЏ РєРІР°СЂС‚РёСЂР°</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--text:#202124;--muted:#74777c;--line:#e5e7eb;--accent:#2f6fed;--danger:#d64545;--ok:#27864a;--shadow:0 8px 28px rgba(30,35,40,.07)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.app{display:flex;min-height:100vh}.side{width:245px;background:#fff;border-right:1px solid var(--line);padding:24px 16px;position:fixed;height:100vh}
+.logo{font-size:22px;font-weight:800;padding:4px 12px 24px}.logo span{color:var(--accent)}
+.nav button{width:100%;border:0;background:transparent;text-align:left;padding:12px 14px;border-radius:12px;margin:3px 0;font-size:15px;cursor:pointer;color:#45484d}.nav button.active,.nav button:hover{background:#eef3ff;color:var(--accent);font-weight:700}
+.main{margin-left:245px;padding:30px;max-width:1250px;width:100%}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}.top h1{margin:0;font-size:30px}.date{color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}.stat{background:var(--card);padding:20px;border-radius:18px;box-shadow:var(--shadow)}.stat b{font-size:30px;display:block;margin-top:8px}.stat small{color:var(--muted)}
+.grid{display:grid;grid-template-columns:1.35fr .9fr;gap:20px}.card{background:var(--card);border-radius:18px;padding:20px;box-shadow:var(--shadow);margin-bottom:20px}.card h2{font-size:18px;margin:0 0 16px}.row{display:flex;gap:10px;align-items:center}.between{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.item{padding:13px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}.item:first-child{border-top:0}.meta{color:var(--muted);font-size:13px;margin-top:4px}.badge{display:inline-block;padding:4px 8px;border-radius:20px;background:#eef1f4;color:#555;font-size:12px}.badge.bad{background:#fff0f0;color:var(--danger)}.badge.good{background:#edf8f1;color:var(--ok)}
+button,.input,select{font:inherit}.btn{border:0;border-radius:10px;padding:9px 13px;cursor:pointer;background:#eef1f4;color:#333}.btn.primary{background:var(--accent);color:white}.btn.danger{background:#fff0f0;color:var(--danger)}.btn.small{padding:6px 9px}.btn:active{transform:translateY(1px)}
+.input,select{border:1px solid var(--line);border-radius:10px;padding:10px 11px;background:white;outline:none;width:100%}.input:focus,select:focus{border-color:#9ab5f5}
+.form{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:9px;margin-bottom:16px}.form.two{grid-template-columns:2fr 1fr auto}.form.rem{grid-template-columns:2fr 1fr 1fr auto}
+.qty{display:flex;align-items:center;gap:7px}.qty strong{min-width:65px;text-align:center}.empty{color:var(--muted);padding:20px 0;text-align:center}
+.page{display:none}.page.active{display:block}.check{text-decoration:line-through;color:#999}
+.notice{background:#fff8e8;border:1px solid #f5dfab;border-radius:12px;padding:12px 14px;margin-bottom:16px}
+@media(max-width:900px){.side{width:190px}.main{margin-left:190px;padding:20px}.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.form,.form.rem{grid-template-columns:1fr 1fr}.form .wide{grid-column:1/-1}}
+@media(max-width:600px){.side{position:static;width:100%;height:auto;border-right:0;border-bottom:1px solid var(--line)}.app{display:block}.main{margin:0;padding:15px}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap}.logo{padding-bottom:12px}.cards{grid-template-columns:1fr 1fr}.form,.form.rem{grid-template-columns:1fr}.top{display:block}.top .date{margin-top:5px}}
+</style>
 </head>
 <body>
-	<header>
-		<nav>
-			<div class="container">
-				<ul class="menu">
-					<li class="menu_item"><a href="#" class="menu_link">Главная</a></li>
-					<li class="menu_item"><a href="#require" class="menu_link">Со своим автомобилем</a></li>
-					<li class="menu_item"><a href="#require" class="menu_link">На автомобиле компании</a></li>
-					<li class="menu_item"><a href="#" class="menu_link">Требования</a></li>
-					<li class="menu_item"><a href="#" class="menu_link">Контакты</a></li>
-					<li class="menu_item"><a href="#" class="menu_link">Оставить заявку</a></li>
-				</ul>
-			</div>
-			<div class="hamburger">
-				<span></span>
-				<span></span>
-				<span></span>
-			</div>
-		</nav>
-		<div class="subheader">
-			<div class="container">
-				<div class="row">
-					<div class="col-6 col-md-4 offset-md-1">
-						<a href="#" class="subheader_logo"><img src="icons/logo.png" alt="logo"></a>
-						<div class="subheader_official">Официальный партнер Uber в Москве</div>
-					</div>
-	
-					<div class="xs-hidden col-md-3 offset-md-1 col-xl-2 offset-xl-2">
-						<div class="subheader_call">Звоните нам ежедневно</div>
-						<a href="tel:84957970988" class="subheader_phone">8 495 797 09 88</a>
-					</div>
-	
-					<div class="col-6 col-md-3">
-						<a href="tel:84957970988" class="xs-visible subheader_phone"></a>
-						<button class="subheader_btn">заказать звонок</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	</header>
+<div class="app">
+<aside class="side">
+  <div class="logo">рџЏ  РњРѕСЏ <span>РєРІР°СЂС‚РёСЂР°</span></div>
+  <div class="nav">
+    <button data-page="home" class="active">рџЏ  Р“Р»Р°РІРЅР°СЏ</button>
+    <button data-page="tasks">рџ“ќ Р”РµР»Р°</button>
+    <button data-page="stock">рџ“¦ Р—Р°РїР°СЃС‹</button>
+    <button data-page="missing">вљ пёЏ Р§РµРіРѕ РЅРµ С…РІР°С‚Р°РµС‚</button>
+    <button data-page="reminders">вЏ° РќР°РїРѕРјРёРЅР°РЅРёСЏ</button>
+    <button data-page="categories">вљ™пёЏ РљР°С‚РµРіРѕСЂРёРё</button>
+  </div>
+</aside>
 
-	<section class="promo">
-		<div class="container">
-			<div class="row">
-				<div class="col-md-12 offset-md-0 col-lg-10 offset-lg-1">
-					<h1 class="promo_header">КОМПАНИЯ UBER PARTNERS!</h1>
-					<h2 class="promo_subheader">ПРИГЛАШАЕМ ВОДИТЕЛЕЙ! НА СВОЕМ АВТО!</h2>
-					<div class="promo_descr">
-						Компания UBER  динамически развивающаяся. Компания на рынке занимает лидирующее место среди
-						таксомоторных компаний, Компания абсолютно прозрачная вы можете контролировать все процессы у себя в личном кабинете. Бонуcная система.Помимо выполненной работы по заказам, компания начисляет бонусы за
-						пиковое время.
-						<br><br>
-						Мы одни из партнеров и зарекомендовали себя как одна из лучших команд в городе Москве.  Водители у нас
-						зарабатывают от 80000- 120000 в месяц.
-					</div>
-					<button class="promo_btn">ОТПРАВИТЬ ЗАЯВКУ!</button>
-				</div>
-			</div>
-		</div>
-	</section>
+<main class="main">
+<div class="top"><div><h1 id="title">Р“Р»Р°РІРЅР°СЏ</h1><div class="date" id="today"></div></div></div>
 
-	<section class="reasons">
-		<div class="container">
-			<div class="label">преимущества</div>
-			<h2 class="title">8 причин начать работать с нами</h2>
-			<div class="row">
-				<div class="col-md-6">
-					<div class="reasons_block">
-						<div class="reasons_round">
-							<img src="icons/reasons/reason_1.png" alt="reason">
-						</div>
-						<div class="reasons_descr">
-							<div class="reasons_subtitle">Никаких наличных, оплата происходит автоматически</div>
-							<div class="reasons_text">
-								Стоимость поездки оплачивается пассажиром с привязанной банковской карты, т.е. нет никаких рисков связанных с перевозкой наличности как для пассажира, так и для водителя, Вам не нужно искать мелкие деньги для размена.
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-md-6">
-					<div class="reasons_block">
-						<div class="reasons_round">
-							<img src="icons/reasons/reason_2.png" alt="reason">
-						</div>
-						<div class="reasons_descr">
-							<div class="reasons_subtitle">Комиссия 8% + БОНУСЫ</div>
-							<div class="reasons_text">
-								У нас минимальная комиссия и мы выплачиваем бонусы за каждую поездку, некоторые наши конкуренты оставляют бонусы себе. Мы работаем честно и с нами водители зарабатывают больше!
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-md-6">
-					<div class="reasons_block">
-						<div class="reasons_round">
-							<img src="icons/reasons/reason_3.png" alt="reason">
-						</div>
-						<div class="reasons_descr">
-							<div class="reasons_subtitle">Высокий доход с гарантированными выплатами</div>
-							<div class="reasons_text">
-								Мы выплачиваем заработную плату на личную банковскую карту водителя! Вам не нужно оформлять ООО, ИП, платить налоги, подавать декларацию, оплачивать бухгалтерские услуги и ведение банковского счета.
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-md-6">
-					<div class="reasons_block">
-						<div class="reasons_round">
-							<img src="icons/reasons/reason_4.png" alt="reason">
-						</div>
-						<div class="reasons_descr">
-							<div class="reasons_subtitle">Работа в удобное время, никаких графиков</div>
-							<div class="reasons_text">
-								Вы просто нажимаете кнопку выйти на линию для начала работы, когда решите закончить, нажимаете выйти с линии. Вы можете подрабатывать только утром, вечером, в выходные или праздничные дни!
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-md-6">
-					<div class="reasons_block">
-						<div class="reasons_round">
-							<img src="icons/reasons/reason_5.png" alt="reason">
-						</div>
-						<div class="reasons_descr">
-							<div class="reasons_subtitle">Комфортное, прозрачное и простое подключение</div>
-							<div class="reasons_text">
-								Мы подключаем дистанционно и бесплатно, Вам нет необходимости приезжать к нам! Вы присылаете нам копии документов, мы регистрируем Вас и присылаем данные для подключения, через 1-2 дня Вы можете начинать работать!
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-md-6">
-					<div class="reasons_block">
-						<div class="reasons_round">
-							<img src="icons/reasons/reason_6.png" alt="reason">
-						</div>
-						<div class="reasons_descr">
-							<div class="reasons_subtitle">Всегда большое количество заказов</div>
-							<div class="reasons_text">
-								Приложение показывает, где на данный момент больше всего заказов и где действуют повышенные тарифы. У Вас не будет простоя и холостых пробегов. Наши пассажиры всегда приятные и абсолютно неконфликтные люди, которых приятно возить.
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-md-6">
-					<div class="reasons_block">
-						<div class="reasons_round">
-							<img src="icons/reasons/reason_7.png" alt="reason">
-						</div>
-						<div class="reasons_descr">
-							<div class="reasons_subtitle">Круглосуточная поддержка</div>
-							<div class="reasons_text">
-								В Uber действует круглосуточная поддержка водителей по электронной почте. Если что-то непонятно, Вы всегда можете задать вопрос через On-line консультацию.
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-md-6">
-					<div class="reasons_block">
-						<div class="reasons_round">
-							<img src="icons/reasons/reason_8.png" alt="reason">
-						</div>
-						<div class="reasons_descr">
-							<div class="reasons_subtitle">Без шашечек и наклеек</div>
-							<div class="reasons_text">
-								Вам не нужно менять цвет, устанавливать «шашки» на автомобиль и обклеивать его наклейками.
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
+<section id="home" class="page active">
+  <div class="cards">
+    <div class="stat"><small>Р”РµР» РѕСЃС‚Р°Р»РѕСЃСЊ</small><b id="sTasks">0</b></div>
+    <div class="stat"><small>Р—Р°РїР°СЃРѕРІ</small><b id="sStock">0</b></div>
+    <div class="stat"><small>РќРµ С…РІР°С‚Р°РµС‚</small><b id="sMissing">0</b></div>
+    <div class="stat"><small>РќР°РїРѕРјРёРЅР°РЅРёР№</small><b id="sRem">0</b></div>
+  </div>
+  <div class="grid">
+    <div class="card"><div class="between"><h2>вљ пёЏ РќСѓР¶РЅРѕ РєСѓРїРёС‚СЊ</h2><button class="btn" onclick="go('missing')">Р’СЃРµ</button></div><div id="homeMissing"></div></div>
+    <div class="card"><div class="between"><h2>вЏ° Р‘Р»РёР¶Р°Р№С€РёРµ РЅР°РїРѕРјРёРЅР°РЅРёСЏ</h2><button class="btn" onclick="go('reminders')">Р’СЃРµ</button></div><div id="homeRem"></div></div>
+  </div>
+</section>
 
-	<section class="mobile">
-		<div class="container">
-			<div class="label">возможности</div>
-			<h2 class="title">мобильное приложение убер</h2>
-			<div class="subtitle">Сделайте заказ, совершите поездку и оплатите ее стоимость, используя свой мобильный телефон</div>
+<section id="tasks" class="page">
+<div class="card"><div class="between"><h2>рџ“ќ Р”РѕРјР°С€РЅРёРµ РґРµР»Р°</h2></div>
+<div class="form two"><input id="taskName" class="input" placeholder="РќР°РїСЂРёРјРµСЂ: РїСЂРѕРїС‹Р»РµСЃРѕСЃРёС‚СЊ"><select id="taskCat"></select><button class="btn primary" onclick="addTask()">Р”РѕР±Р°РІРёС‚СЊ</button></div>
+<div id="taskList"></div></div>
+</section>
 
-			<div class="row">
-				<div class="col-md-6 col-lg-4">
-					<div class="mobile_item mobile_item_1">
-						<div class="mobile_item_subtitle">
-							оформление заказа одним касанием
-						</div>
-						<div class="mobile_item_plus"></div>
-					</div>
-				</div>
-				<div class="col-md-6 col-lg-4">
-					<div class="mobile_item mobile_item_2">
-						<div class="mobile_item_subtitle">
-							надежная подача
-						</div>
-						<div class="mobile_item_plus"></div>
-					</div>
-				</div>
-				<div class="col-md-6 col-lg-4">
-					<div class="mobile_item mobile_item_3">
-						<div class="mobile_item_subtitle">
-							прозрачные цены
-						</div>
-						<div class="mobile_item_plus"></div>
-					</div>
-				</div>
-				<div class="col-md-6 col-lg-4">
-					<div class="mobile_item mobile_item_4">
-						<div class="mobile_item_subtitle">
-							безналичная оплата
-						</div>
-						<div class="mobile_item_plus"></div>
-					</div>
-				</div>
-				<div class="col-md-6 col-lg-4">
-					<div class="mobile_item mobile_item_5">
-						<div class="mobile_item_subtitle">
-							обратная связь
-						</div>
-						<div class="mobile_item_plus"></div>
-					</div>
-				</div>
-				<div class="col-md-6 col-lg-4">
-					<div class="mobile_item mobile_item_6">
-						<div class="mobile_item_subtitle">
-							разделить стоимость поездки
-						</div>
-						<div class="mobile_item_plus"></div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
+<section id="stock" class="page">
+<div class="card"><div class="between"><h2>рџ“¦ Р—Р°РїР°СЃС‹</h2><button class="btn primary" onclick="focusAdd()">пј‹ Р”РѕР±Р°РІРёС‚СЊ Р·Р°РїР°СЃ</button></div>
+<div class="form" id="stockForm">
+<input id="stockName" class="input wide" placeholder="Р§С‚Рѕ? РќР°РїСЂРёРјРµСЂ: РјРѕР»РѕРєРѕ">
+<select id="stockCat"></select>
+<input id="stockQty" class="input" type="number" min="0" step="0.01" placeholder="РљРѕР»РёС‡РµСЃС‚РІРѕ">
+<select id="stockUnit"><option>С€С‚.</option><option>Рі</option><option>РєРі</option><option>РјР»</option><option>Р»</option></select>
+<button class="btn primary" onclick="addStock()">Р”РѕР±Р°РІРёС‚СЊ</button>
+</div>
+<div class="meta" style="margin-bottom:12px">РњРёРЅРёРјСѓРј Р·Р°РґР°С‘С‚СЃСЏ РїРѕСЃР»Рµ РґРѕР±Р°РІР»РµРЅРёСЏ. РљРѕРіРґР° Р·Р°РїР°СЃ РЅРёР¶Рµ РјРёРЅРёРјСѓРјР°, РѕРЅ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РїРѕСЏРІР»СЏРµС‚СЃСЏ РІ В«Р§РµРіРѕ РЅРµ С…РІР°С‚Р°РµС‚В».</div>
+<div id="stockList"></div></div>
+</section>
 
-	<section class="choice">
-		<div class="container">
-			<div class="black"></div>
-			<div class="label label_white">возможности</div>
-			<h2 class="title title_white hidden-320">Выбор - отличная штука!</h2>
-			<div class="subtitle subtitle_white hidden-320">Закажите автомобиль, который подходит вам по стилю и бюджету</div>
+<section id="missing" class="page">
+<div class="card"><h2>вљ пёЏ Р§РµРіРѕ РЅРµ С…РІР°С‚Р°РµС‚</h2><div id="missingList"></div></div>
+</section>
 
-			<img src="img/car.png" alt="uber car" class="choice_img">
-			<div class="choice_descr">
-				Машины на каждый день.<br>
-				Лучше, быстрее и дешевле, чем такси
-			</div>
-		</div>
-	</section>
+<section id="reminders" class="page">
+<div class="card"><h2>вЏ° РќР°РїРѕРјРёРЅР°РЅРёСЏ</h2>
+<div class="form rem"><input id="remText" class="input" placeholder="РќР°РїСЂРёРјРµСЂ: РєСѓРїРёС‚СЊ РєРѕСЂРј"><input id="remDate" class="input" type="datetime-local"><select id="remRepeat"><option value="once">РћРґРёРЅ СЂР°Р·</option><option value="daily">РљР°Р¶РґС‹Р№ РґРµРЅСЊ</option><option value="weekly">РљР°Р¶РґСѓСЋ РЅРµРґРµР»СЋ</option></select><button class="btn primary" onclick="addReminder()">Р”РѕР±Р°РІРёС‚СЊ</button></div>
+<div id="remList"></div></div>
+</section>
 
-	<section class="require" id="require">
-		<div class="container">
-			<div class="label">возможности</div>
-			<h2 class="title">условия и требования</h2>
-		<div class="row">
-			<div class="col-md-6">
-				<div class="require_block">
-					<div class="require_title">
-						УСЛОВИЯ: со своим авто:
-					</div>
-					<ul class="require_list">
-						<li>Подключаем к системе UBER  под 10%.</li>
-						<li>
-							Ни каких взносов  0%!
-						</li>
-						<li>
-							Можем подключать удаленно без приезда в офис
-						</li>
-						<li>
-							ИП не требуется
-						</li>
-						<li>
-							Заказы распределяются без учета рейтинга ближай-<br>шим водителям
-						</li>
-						<li>
-							Работа только по безналичному расчету
-						</li>
-						<li>
-							Деньги перечисляем на карту водителю или наличны-<br>ми в офисе
-						</li>
-					</ul>
-					<div class="require_descr">
-						В день заработок составляет 7000-12000р + бонус 3000т<br> рублей
-					</div>
-				</div>
-			</div>
-			<div class="col-md-6">
-				<div class="require_block">
-					<div class="require_title">
-						УСЛОВИЯ: на авто компании:
-					</div>
-					<ul class="require_list">
-						<li>
-							Предоставляем авто без залога
-						</li>
-						<li>
-							Без ежедневных выплат по аренде
-						</li>
-						<li>
-							Среда пятница и суббота работа на компанию остальные дни вы работаете на себя
-						</li>
-					</ul>
-				</div>
-			</div>
-			<div class="col-md-6">
-				<div class="require_block require_block_nmb warning">
-					<div class="require_title">
-						ТРЕБОВАНИЕ:
-					</div>
-					<ul class="require_list">
-						<li>
-							Наличие автомобиля без рекламы
-						</li>
-						<li>
-							Автомобиль не должен быть желтый и не с желтыми номерами
-						</li>
-						<li>
-							Машина не старше 3 лет
-						</li>
-						<li>
-							Стаж вождения не менее 3 лет
-						</li>
-						<li>
-							Девайс на системе андроид 4.0и выше(самсунг)
-						</li>
-					</ul>
-				</div>
-			</div>
-			<div class="col-md-6">
-				<div class="require_block require_block_nmb warning">
-					<div class="require_title">
-						ДОКУМЕНТЫ:
-					</div>
-					<ul class="require_list">
-						<li>
-							Права 2 стороны
-						</li>
-						<li>
-							Паспорт лицевая сторона
-						</li>
-						<li>
-							СтС
-						</li>
-						<li>
-							Лицензия( если есть)
-						</li>
-						<li>
-							Номер телефона
-						</li>
-						<li>
-							Номер карты для перечисления денег(указать в письме)!
-						</li>
-					</ul>
-				</div>
-			</div>
-		</div>
-		</div>
-	</section>
+<section id="categories" class="page">
+<div class="card"><h2>вљ™пёЏ РњРѕРё РєР°С‚РµРіРѕСЂРёРё</h2>
+<div class="form two"><input id="catName" class="input" placeholder="РќРѕРІР°СЏ РєР°С‚РµРіРѕСЂРёСЏ"><span></span><button class="btn primary" onclick="addCategory()">Р”РѕР±Р°РІРёС‚СЊ</button></div>
+<div id="catList"></div></div>
+</section>
+</main></div>
 
-	<section class="world">
-		<div class="container">
-			<div class="label label_white label_min">города</div>
-			<h2 class="title title_white">По всему миру</h2>
-			<div class="subtitle subtitle_white">Мы в вашем городе и по всему миру</div>
-
-			<a href="#" class="world_link">посмотреть все города</a>
-		</div>
-	</section>
-
-	<footer>
-		<div class="footer_divider"></div>
-		<div class="footer_wrapper">
-			<!-- Если не оборачивать каждый блок в обертку - получится криво -->
-			<div>
-				<div class="footer_social">
-					<a href="#" class="footer_social_item">
-						<i class="fab fa-facebook-f"></i>
-					</a>
-					<a href="#" class="footer_social_item">
-						<i class="fab fa-twitter"></i>
-					</a>
-					<a href="#" class="footer_social_item">
-						<i class="fab fa-linkedin"></i>
-					</a>
-					<a href="#" class="footer_social_item">
-						<i class="fab fa-instagram"></i>
-					</a>
-				</div>
-			</div>
-			<div>
-				<div class="footer_links">
-					<div class="footer_links_main">
-						<a href="#">на главную</a>
-						<a href="#">города</a>
-						<a href="#">для водителей</a>
-					</div>
-					<div class="footer_links_sub">
-						<a href="#">центр поддержки</a>
-						<a href="#">вакансии</a>
-						<a href="#">разработчики</a>
-						<a href="#">блог</a>
-						<a href="#">о нас</a>
-					</div>
-					<a href="#" class="footer_links_lang">Русский</a>
-				</div>
-			</div>
-			<div>
-				<div class="footer_mobile">
-					<a href="#">
-						<img src="img/app_store.png" alt="App Store">
-					</a>
-					<a href="#">
-						<img src="img/google_play.png" alt="Google play">
-					</a>
-					<a href="#">
-						<img src="img/windows_store.png" alt="Windows store">
-					</a>
-				</div>
-			</div>
-		</div>
-	</footer>
-
-	<script src="js/script.js"></script>
+<script>
+const KEY='apartment_v1';
+let db=JSON.parse(localStorage.getItem(KEY)||'null')||{
+categories:['РџСЂРѕРґСѓРєС‚С‹','Р‘С‹С‚РѕРІР°СЏ С…РёРјРёСЏ','Р’Р°РЅРЅР°СЏ','РљСѓС…РЅСЏ','РЎРїР°Р»СЊРЅСЏ','Р”СЂСѓРіРѕРµ'],
+tasks:[{id:1,name:'РЈР±СЂР°С‚СЊ РєСѓС…РЅСЋ',cat:'РљСѓС…РЅСЏ',done:false},{id:2,name:'РџРѕСЃС‚РёСЂР°С‚СЊ Р±РµР»СЊС‘',cat:'РЎРїР°Р»СЊРЅСЏ',done:false}],
+stock:[{id:1,name:'РњРѕР»РѕРєРѕ',cat:'РџСЂРѕРґСѓРєС‚С‹',qty:1.5,min:1,unit:'Р»'},{id:2,name:'РЇР№С†Р°',cat:'РџСЂРѕРґСѓРєС‚С‹',qty:4,min:6,unit:'С€С‚.'},{id:3,name:'Р РёСЃ',cat:'РџСЂРѕРґСѓРєС‚С‹',qty:700,min:500,unit:'Рі'},{id:4,name:'РўСѓР°Р»РµС‚РЅР°СЏ Р±СѓРјР°РіР°',cat:'Р’Р°РЅРЅР°СЏ',qty:8,min:4,unit:'С€С‚.'}],
+reminders:[]
+};
+function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
+function id(){return Date.now()+Math.random()}
+function go(page){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(page).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));let names={home:'Р“Р»Р°РІРЅР°СЏ',tasks:'Р”РµР»Р°',stock:'Р—Р°РїР°СЃС‹',missing:'Р§РµРіРѕ РЅРµ С…РІР°С‚Р°РµС‚',reminders:'РќР°РїРѕРјРёРЅР°РЅРёСЏ',categories:'РљР°С‚РµРіРѕСЂРёРё'};document.getElementById('title').textContent=names[page]}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
+function opts(selected){return db.categories.map(c=>`<option ${c===selected?'selected':''}>${esc(c)}</option>`).join('')}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function missing(){return db.stock.filter(x=>Number(x.qty)<Number(x.min))}
+function addTask(){let n=taskName.value.trim();if(!n)return;db.tasks.push({id:id(),name:n,cat:taskCat.value,done:false});taskName.value='';save()}
+function toggleTask(i){db.tasks[i].done=!db.tasks[i].done;save()}
+function delTask(i){db.tasks.splice(i,1);save()}
+function addStock(){let n=stockName.value.trim(),q=Number(stockQty.value);if(!n||isNaN(q))return;db.stock.push({id:id(),name:n,cat:stockCat.value,qty:q,min:0,unit:stockUnit.value});stockName.value='';stockQty.value='';save()}
+function changeQty(i,d){db.stock[i].qty=Math.max(0,Number((db.stock[i].qty+d).toFixed(2)));save()}
+function setMin(i,v){db.stock[i].min=Math.max(0,Number(v));save()}
+function delStock(i){db.stock.splice(i,1);save()}
+function addReminder(){let t=remText.value.trim(),d=remDate.value;if(!t||!d)return;db.reminders.push({id:id(),text:t,date:d,repeat:remRepeat.value,done:false});remText.value='';remDate.value='';save()}
+function delReminder(i){db.reminders.splice(i,1);save()}
+function addCategory(){let n=catName.value.trim();if(!n||db.categories.includes(n))return;db.categories.push(n);catName.value='';save()}
+function renameCat(i){let n=prompt('РќРѕРІРѕРµ РЅР°Р·РІР°РЅРёРµ РєР°С‚РµРіРѕСЂРёРё:',db.categories[i]);if(!n||n===db.categories[i])return;let old=db.categories[i];db.categories[i]=n;db.tasks.forEach(x=>{if(x.cat===old)x.cat=n});db.stock.forEach(x=>{if(x.cat===old)x.cat=n});save()}
+function delCat(i){if(db.categories.length<=1){alert('Р”РѕР»Р¶РЅР° РѕСЃС‚Р°С‚СЊСЃСЏ С…РѕС‚СЏ Р±С‹ РѕРґРЅР° РєР°С‚РµРіРѕСЂРёСЏ.');return}let c=db.categories[i];if(!confirm('РЈРґР°Р»РёС‚СЊ РєР°С‚РµРіРѕСЂРёСЋ В«'+c+'В»? РўРѕРІР°СЂС‹ Рё РґРµР»Р° РѕСЃС‚Р°РЅСѓС‚СЃСЏ, РЅРѕ РїРѕР»СѓС‡Р°С‚ РєР°С‚РµРіРѕСЂРёСЋ В«Р”СЂСѓРіРѕРµВ» (РµСЃР»Рё РѕРЅР° РµСЃС‚СЊ).'))return;let fallback=db.categories.find(x=>x==='Р”СЂСѓРіРѕРµ')||db.categories.find((_,j)=>j!==i);db.categories.splice(i,1);db.tasks.forEach(x=>{if(x.cat===c)x.cat=fallback});db.stock.forEach(x=>{if(x.cat===c)x.cat=fallback});save()}
+function focusAdd(){go('stock');stockName.focus()}
+function fmtDate(d){return new Date(d).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
+function render(){
+today.textContent=new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+taskCat.innerHTML=opts(taskCat.value||db.categories[0]);stockCat.innerHTML=opts(stockCat.value||db.categories[0]);
+sTasks.textContent=db.tasks.filter(x=>!x.done).length;sStock.textContent=db.stock.length;sMissing.textContent=missing().length;sRem.textContent=db.reminders.filter(x=>!x.done).length;
+taskList.innerHTML=db.tasks.length?db.tasks.map((x,i)=>`<div class="item"><div><input type="checkbox" ${x.done?'checked':''} onchange="toggleTask(${i})"> <span class="${x.done?'check':''}">${esc(x.name)}</span><div class="meta">${esc(x.cat)}</div></div><button class="btn danger small" onclick="delTask(${i})">РЈРґР°Р»РёС‚СЊ</button></div>`).join(''):'<div class="empty">Р”РµР» РїРѕРєР° РЅРµС‚.</div>';
+stockList.innerHTML=db.stock.length?db.stock.map((x,i)=>{let bad=Number(x.qty)<Number(x.min);return `<div class="item"><div style="flex:1"><b>${esc(x.name)}</b><div class="meta">${esc(x.cat)} В· РјРёРЅРёРјСѓРј <input style="width:80px" class="input" type="number" min="0" step=".01" value="${x.min}" onchange="setMin(${i},this.value)"> ${esc(x.unit)}</div></div><div class="qty"><button class="btn small" onclick="changeQty(${i},-${x.unit==='С€С‚.'?1:(x.unit==='РєРі'||x.unit==='Р»'?0.1:50)})">в€’</button><strong>${x.qty} ${esc(x.unit)}</strong><button class="btn small" onclick="changeQty(${i},${x.unit==='С€С‚.'?1:(x.unit==='РєРі'||x.unit==='Р»'?0.1:50)})">пј‹</button><span class="badge ${bad?'bad':'good'}">${bad?'РќРµ С…РІР°С‚Р°РµС‚':'Р•СЃС‚СЊ'}</span><button class="btn danger small" onclick="delStock(${i})">Г—</button></div></div>`}).join(''):'<div class="empty">Р—Р°РїР°СЃРѕРІ РїРѕРєР° РЅРµС‚.</div>';
+let m=missing();missingList.innerHTML=m.length?m.map(x=>`<div class="item"><div><b>${esc(x.name)}</b><div class="meta">${esc(x.cat)} В· РѕСЃС‚Р°Р»РѕСЃСЊ ${x.qty} ${esc(x.unit)}, РЅСѓР¶РЅРѕ РјРёРЅРёРјСѓРј ${x.min} ${esc(x.unit)}</div></div><button class="btn primary" onclick="go('stock')">РџРѕРїРѕР»РЅРёС‚СЊ</button></div>`).join(''):'<div class="empty">рџЋ‰ Р’СЃС‘ РЅРµРѕР±С…РѕРґРёРјРѕРµ РµСЃС‚СЊ РґРѕРјР°.</div>';
+homeMissing.innerHTML=m.length?m.slice(0,5).map(x=>`<div class="item"><div><b>${esc(x.name)}</b><div class="meta">${x.qty} ${esc(x.unit)} РёР· ${x.min} ${esc(x.unit)} РјРёРЅРёРјСѓРј</div></div><span class="badge bad">РљСѓРїРёС‚СЊ</span></div>`).join(''):'<div class="empty">Р’СЃС‘ РІ РїРѕСЂСЏРґРєРµ рџЋ‰</div>';
+let rs=db.reminders.filter(x=>!x.done).sort((a,b)=>new Date(a.date)-new Date(b.date));homeRem.innerHTML=rs.length?rs.slice(0,4).map(x=>`<div class="item"><div><b>${esc(x.text)}</b><div class="meta">${fmtDate(x.date)} В· ${x.repeat==='once'?'РѕРґРёРЅ СЂР°Р·':x.repeat==='daily'?'РєР°Р¶РґС‹Р№ РґРµРЅСЊ':'РєР°Р¶РґСѓСЋ РЅРµРґРµР»СЋ'}</div></div></div>`).join(''):'<div class="empty">РќР°РїРѕРјРёРЅР°РЅРёР№ РЅРµС‚.</div>';
+remList.innerHTML=db.reminders.length?rs.map((x)=>{let i=db.reminders.indexOf(x);return `<div class="item"><div><b>${esc(x.text)}</b><div class="meta">${fmtDate(x.date)} В· ${x.repeat==='once'?'РѕРґРёРЅ СЂР°Р·':x.repeat==='daily'?'РєР°Р¶РґС‹Р№ РґРµРЅСЊ':'РєР°Р¶РґСѓСЋ РЅРµРґРµР»СЋ'}</div></div><button class="btn danger small" onclick="delReminder(${i})">РЈРґР°Р»РёС‚СЊ</button></div>`}).join(''):'<div class="empty">РќР°РїРѕРјРёРЅР°РЅРёР№ РїРѕРєР° РЅРµС‚.</div>';
+catList.innerHTML=db.categories.map((c,i)=>`<div class="item"><b>${esc(c)}</b><div class="row"><button class="btn small" onclick="renameCat(${i})">РџРµСЂРµРёРјРµРЅРѕРІР°С‚СЊ</button><button class="btn danger small" onclick="delCat(${i})">РЈРґР°Р»РёС‚СЊ</button></div></div>`).join('');
+}
+render();
+</script>
 </body>
 </html>
