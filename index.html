@@ -1,8 +1,13 @@
+<!doctype html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Моя квартира</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="theme-color" content="#2f6fed">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--text:#202124;--muted:#74777c;--line:#e5e7eb;--accent:#2f6fed;--danger:#d64545;--ok:#27864a;--shadow:0 8px 28px rgba(30,35,40,.07)}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
@@ -120,6 +125,13 @@ button,.input,select{font:inherit}.btn{border:0;border-radius:10px;padding:9px 1
 </section>
 
 <section id="reminders" class="page">
+<div class="card"><h2>🔔 Уведомления на этом телефоне</h2>
+<p class="meta">Напоминания приходят по выбранному времени, даже когда сайт закрыт. Каждый телефон подключается отдельно</p>
+<p class="notice" id="pushIosHint" hidden>На iPhone: откройте сайт в Safari → «Поделиться» → «На экран Домой». Запустите его из новой иконки и нажмите «Включить уведомления»</p>
+<div class="row" style="flex-wrap:wrap"><button id="pushEnable" class="btn primary" onclick="enablePush()">Включить уведомления</button><button id="pushTest" class="btn" onclick="testPush()" hidden>Проверить</button><button id="pushDisable" class="btn" onclick="disablePush()" hidden>Отключить</button></div>
+<div id="pushStatus" class="feedback" role="status" aria-live="polite">Проверяем поддержку уведомлений…</div>
+<p class="meta">Телефону нужен интернет. Отправка проверяется каждую минуту, доставка может задержаться. Повторы – каждые 24 часа или 7 дней</p>
+</div>
 <div class="card"><h2>⏰ Напоминания</h2>
 <div class="form rem"><input id="remText" class="input" placeholder="Например: купить корм"><input id="remDate" class="input" type="datetime-local"><select id="remRepeat"><option value="once">Один раз</option><option value="daily">Каждый день</option><option value="weekly">Каждую неделю</option></select><button class="btn primary" onclick="addReminder()">Добавить</button></div>
 <div id="remList"></div></div>
@@ -154,7 +166,7 @@ function addStock(){let n=stockName.value.trim(),q=Number(stockQty.value);if(!n|
 function changeQty(i,d){db.stock[i].qty=Math.max(0,Number((db.stock[i].qty+d).toFixed(2)));save()}
 function setMin(i,v){db.stock[i].min=Math.max(0,Number(v));save()}
 function delStock(i){db.stock.splice(i,1);save()}
-function addReminder(){let t=remText.value.trim(),d=remDate.value;if(!t||!d)return;db.reminders.push({id:id(),text:t,date:d,repeat:remRepeat.value,done:false});remText.value='';remDate.value='';save()}
+function addReminder(){let t=remText.value.trim(),d=remDate.value;if(!t||!d)return;db.reminders.push({id:id(),text:t,date:new Date(d).toISOString(),repeat:remRepeat.value,done:false});remText.value='';remDate.value='';save()}
 function delReminder(i){db.reminders.splice(i,1);save()}
 function addCategory(){let n=catName.value.trim();if(!n||db.categories.includes(n))return;db.categories.push(n);catName.value='';save()}
 function renameCat(i){let n=prompt('Новое название категории:',db.categories[i]);if(!n||n===db.categories[i])return;let old=db.categories[i];db.categories[i]=n;db.tasks.forEach(x=>{if(x.cat===old)x.cat=n});db.stock.forEach(x=>{if(x.cat===old)x.cat=n});save()}
@@ -234,6 +246,41 @@ setInterval(()=>{if(cloudReady&&cloudToken&&!cloudDirty&&!cloudBusy&&!document.h
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cloudToken&&!cloudBusy){if(cloudDirty)flushCloud();else loadCloud()}});
 window.addEventListener('online',()=>{if(cloudToken){if(cloudDirty)flushCloud();else loadCloud()}});
 window.addEventListener('beforeunload',e=>{if(cloudDirty){e.preventDefault();e.returnValue=''}});
+
+const PUSH_ID_KEY='apartment_push_id';
+let pushRegistration=null,pushBusy=false;
+const pushSupported=()=>('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window);
+const isIphone=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+function pushMessage(message){pushStatus.textContent=message;}
+function pushButtons(enabled){pushEnable.hidden=enabled;pushTest.hidden=!enabled;pushDisable.hidden=!enabled;}
+function pushLock(value){pushBusy=value;[pushEnable,pushTest,pushDisable].forEach(b=>b.disabled=value);}
+async function initPush(){
+ pushIosHint.hidden=!(isIphone()&&!isStandalone());
+ if(isIphone()&&!isStandalone()){pushEnable.disabled=true;pushMessage('Для уведомлений запустите сайт с экрана «Домой»');return;}
+ if(!pushSupported()){pushEnable.disabled=true;pushMessage('Этот браузер не поддерживает уведомления сайта. На Android попробуйте Chrome, на iPhone – сайт с экрана «Домой»');return;}
+ try{pushRegistration=await navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'});await navigator.serviceWorker.ready;const sub=await pushRegistration.pushManager.getSubscription();const enabled=!!sub&&Notification.permission==='granted';pushButtons(enabled);pushMessage(enabled?(localStorage.getItem(PUSH_ID_KEY)?'Уведомления включены на этом телефоне':'Подписка браузера есть. Нажмите «Проверить», чтобы подключить её к квартире'):Notification.permission==='denied'?'Уведомления запрещены. Разрешите их в настройках сайта или телефона':'Нажмите «Включить уведомления» и разрешите их показ');}catch{pushMessage('Не удалось загрузить службу уведомлений. Проверьте, что sw.js опубликован рядом с index.html');}
+}
+function decodePushKey(value){const bytes=atob(value.replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(bytes,c=>c.charCodeAt(0));}
+async function registerSubscription(sub){const result=await apiCloud('/push/subscribe','POST',{subscription:sub.toJSON()});localStorage.setItem(PUSH_ID_KEY,result.id);return result.id;}
+async function enablePush(){
+ if(pushBusy)return;if(!cloudReady||!cloudToken){pushMessage('Сначала войдите в квартиру');return;}
+ if(!pushRegistration){pushMessage('Служба уведомлений ещё не готова. Обновите страницу');return;}
+ // Ask synchronously from the tap: iOS requires a direct user gesture.
+ const permissionPromise=Notification.requestPermission();pushLock(true);
+ try{const permission=await permissionPromise;if(permission!=='granted'){pushMessage('Разрешение не получено. Его можно изменить в настройках телефона');return;}
+ const config=await apiCloud('/push/config');let sub=await pushRegistration.pushManager.getSubscription();
+ const key=decodePushKey(config.publicKey);
+ if(sub&&sub.options.applicationServerKey){const old=new Uint8Array(sub.options.applicationServerKey);if(old.length!==key.length||old.some((b,i)=>b!==key[i])){await sub.unsubscribe();sub=null;localStorage.removeItem(PUSH_ID_KEY);}}
+ if(!sub)sub=await pushRegistration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:key});
+ await registerSubscription(sub);pushButtons(true);pushMessage('Уведомления включены. Нажмите «Проверить», затем создайте напоминание');
+ }catch(e){pushMessage('Не удалось подключить уведомления: '+e.message+'. Если разрешение уже выдано, нажмите кнопку ещё раз');}finally{pushLock(false);}
+}
+async function testPush(){if(pushBusy)return;if(!cloudReady||!cloudToken){pushMessage('Сначала войдите в квартиру');return;}pushLock(true);try{const sub=await pushRegistration?.pushManager.getSubscription();if(!sub)throw new Error('Подписка отсутствует. Включите уведомления заново');const id=await registerSubscription(sub);await apiCloud('/push/test','POST',{id});pushMessage('Проверочное уведомление отправлено. Проверьте уведомления телефона');}catch(e){pushMessage(e.message);}finally{pushLock(false);}}
+async function disablePush(){if(pushBusy)return;if(!cloudReady||!cloudToken){pushMessage('Сначала войдите в квартиру');return;}pushLock(true);try{const sub=await pushRegistration?.pushManager.getSubscription();let id=localStorage.getItem(PUSH_ID_KEY);if(sub&&!id)id=await registerSubscription(sub);if(id)await apiCloud('/push/unsubscribe','POST',{id});if(sub)await sub.unsubscribe();localStorage.removeItem(PUSH_ID_KEY);pushButtons(false);pushMessage('Уведомления отключены на этом телефоне');}catch(e){pushMessage('Не удалось отключить: '+e.message);}finally{pushLock(false);}}
+initPush();
+if(new URLSearchParams(location.search).get('page')==='reminders')go('reminders');
+
 </script>
 </body>
 </html>
