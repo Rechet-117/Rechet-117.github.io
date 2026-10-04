@@ -44,7 +44,19 @@ button,.input,select{font:inherit}.btn{border:0;border-radius:10px;padding:9px 1
 <main class="main">
 <div class="top"><div><h1 id="title">Главная</h1><div class="date" id="today"></div></div></div>
 
-<div class="local-note">Пробная версия · данные пока сохраняются только в этом браузере</div>
+<div class="card" id="cloudPanel">
+<div class="between"><h2>Общая квартира</h2><button id="logoutBtn" class="btn" hidden onclick="logoutCloud()">Выйти</button></div>
+<form id="loginForm" class="row" style="flex-wrap:wrap" onsubmit="event.preventDefault();loginCloud()">
+<label style="flex:1;min-width:180px">Пароль квартиры<input id="cloudPassword" class="input" type="password" autocomplete="current-password" required></label>
+<label><input id="rememberCloud" type="checkbox" checked> Запомнить вход</label><button id="loginBtn" class="btn primary">Войти</button>
+</form>
+<div id="cloudStatus" class="feedback" role="status" aria-live="polite">Войдите для доступа к общим запасам</div>
+<div class="row" style="flex-wrap:wrap;margin-top:12px">
+<button id="importBtn" class="btn primary" hidden onclick="importLocalData()">Перенести запасы с этого устройства</button>
+<button id="retryBtn" class="btn" hidden onclick="retryCloud()">Повторить сохранение</button>
+<button id="refreshBtn" class="btn" hidden onclick="discardAndRefresh()">Загрузить общие данные</button>
+<button id="backupBtn" class="btn" onclick="downloadBackup()">Скачать копию данных</button>
+</div></div>
 <section id="home" class="page active">
   <div class="cards">
     <div class="stat"><small>Дел осталось</small><b id="sTasks">0</b></div>
@@ -110,7 +122,7 @@ tasks:[{id:1,name:'Убрать кухню',cat:'Кухня',done:false},{id:2,n
 stock:[{id:1,name:'Молоко',cat:'Продукты',qty:1.5,min:1,unit:'л'},{id:2,name:'Яйца',cat:'Продукты',qty:4,min:6,unit:'шт.'},{id:3,name:'Рис',cat:'Продукты',qty:700,min:500,unit:'г'},{id:4,name:'Туалетная бумага',cat:'Ванная',qty:8,min:4,unit:'шт.'}],
 reminders:[]
 };
-function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));render();cloudDirty=true;cloudRevision++;localStorage.setItem('apartment_pending',JSON.stringify({data:db,sha:cloudSha}));flushCloud()}
 function id(){return Date.now()+Math.random()}
 function go(page){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(page).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));let names={home:'Главная',tasks:'Дела',stock:'Запасы',missing:'Чего не хватает',reminders:'Напоминания',categories:'Категории'};document.getElementById('title').textContent=names[page]}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
@@ -180,7 +192,30 @@ function applyCommand(){if(!pendingCommand)return;const x=db.stock.find(x=>x.id=
 function undoCommand(){if(!lastChange)return;const x=db.stock.find(x=>x.id===lastChange.id);if(!x||Number(x.qty)!==lastChange.after){voiceFeedback.textContent='Запас уже изменился. Автоматическая отмена недоступна'}else{x.qty=lastChange.before;save();voiceFeedback.textContent='Изменение отменено'}lastChange=null;undoVoice.hidden=true}
 function startVoice(){if(!SpeechAPI){voiceFeedback.textContent='Браузер не поддерживает голосовой ввод сайта. Используйте микрофон клавиатуры в поле команды';return}if(!window.isSecureContext){voiceFeedback.textContent='Для голосового ввода откройте сайт по HTTPS';return}pendingCommand=null;applyVoice.hidden=true;recognition=new SpeechAPI();recognition.lang='ru-RU';recognition.interimResults=false;recognition.continuous=false;recognition.onstart=()=>{voiceButton.disabled=true;stopVoice.hidden=false;voiceFeedback.textContent='Слушаю…'};recognition.onresult=e=>{commandText.value=cleanCommand(e.results[0][0].transcript);previewCommand()};recognition.onerror=e=>{voiceFeedback.textContent=({ 'not-allowed':'Разрешите доступ к микрофону в настройках браузера','no-speech':'Речь не услышана. Попробуйте ещё раз',network:'Распознавание недоступно. Проверьте интернет или используйте микрофон клавиатуры'})[e.error]||'Не удалось распознать речь. Попробуйте ввод через клавиатуру'};recognition.onend=()=>{voiceButton.disabled=false;stopVoice.hidden=true};try{recognition.start()}catch(e){voiceFeedback.textContent='Не удалось включить микрофон';voiceButton.disabled=false;stopVoice.hidden=true}}
 if(!SpeechAPI)voiceFeedback.textContent='Голос сайта недоступен в этом браузере. Можно использовать микрофон клавиатуры';
-render();
+
+const CLOUD_API='https://apartment-api.mentalist00788.workers.dev';
+let cloudToken=sessionStorage.getItem('apartment_session')||localStorage.getItem('apartment_session')||'';
+let cloudSha=null,cloudReady=false,cloudDirty=false,cloudBusy=false,cloudConflict=false,cloudRevision=0;
+if(!localStorage.getItem('apartment_local_before_cloud'))localStorage.setItem('apartment_local_before_cloud',JSON.stringify(db));
+const oldLocal=JSON.parse(localStorage.getItem('apartment_local_before_cloud'));
+try{const pending=JSON.parse(localStorage.getItem('apartment_pending')||'null');if(pending){db=pending.data;cloudSha=pending.sha;cloudDirty=true}}catch{}
+function statusCloud(text){cloudStatus.textContent=text}
+function setReady(value){cloudReady=value;document.querySelectorAll('section.page').forEach(x=>x.inert=!value);logoutBtn.hidden=!cloudToken;loginForm.hidden=!!cloudToken;}
+async function apiCloud(path,method='GET',body){const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),20000);try{const r=await fetch(CLOUD_API+path,{method,headers:{'Content-Type':'application/json',...(cloudToken?{Authorization:'Bearer '+cloudToken}:{})},...(body?{body:JSON.stringify(body)}:{}),signal:controller.signal,cache:'no-store'});const data=await r.json();if(!r.ok){const e=new Error(data.error||'Ошибка сервиса');e.status=r.status;throw e}return data}finally{clearTimeout(timeout)}}
+function expireCloud(){cloudToken='';localStorage.removeItem('apartment_session');sessionStorage.removeItem('apartment_session');setReady(false);statusCloud('Сессия закончилась. Введите пароль снова. Локальные данные сохранены')}
+async function loginCloud(){loginBtn.disabled=true;statusCloud('Входим…');try{const result=await apiCloud('/login','POST',{password:cloudPassword.value});cloudToken=result.token;localStorage.removeItem('apartment_session');sessionStorage.removeItem('apartment_session');(rememberCloud.checked?localStorage:sessionStorage).setItem('apartment_session',cloudToken);cloudPassword.value='';setReady(false);if(cloudDirty){setReady(true);await flushCloud()}else await loadCloud()}catch(e){statusCloud(e.message==='Failed to fetch'?'Не удалось подключиться к сервису':e.message)}finally{loginBtn.disabled=false}}
+async function loadCloud(){if(cloudBusy||cloudDirty)return;cloudBusy=true;try{const result=await apiCloud('/data');cloudSha=result.sha;db=result.data;localStorage.setItem(KEY,JSON.stringify(db));render();setReady(true);importBtn.hidden=result.initialized;refreshBtn.hidden=true;retryBtn.hidden=true;cloudConflict=false;statusCloud(result.initialized?'Общие данные загружены':'Общая база пока пуста. Перенесите запасы с этого устройства или добавьте новые')}catch(e){if(e.status===401)expireCloud();else{statusCloud('Не удалось загрузить данные: '+e.message);refreshBtn.hidden=false}}finally{cloudBusy=false}}
+async function flushCloud(){if(!cloudReady||!cloudToken||cloudBusy||cloudConflict)return;cloudBusy=true;try{while(cloudDirty){const revision=cloudRevision;const snapshot=JSON.parse(JSON.stringify(db));statusCloud('Сохраняем…');const saved=await apiCloud('/data','PUT',{data:snapshot,sha:cloudSha});cloudSha=saved.sha;if(revision===cloudRevision){cloudDirty=false;localStorage.removeItem('apartment_pending')}else localStorage.setItem('apartment_pending',JSON.stringify({data:db,sha:cloudSha}));importBtn.hidden=true}retryBtn.hidden=true;refreshBtn.hidden=true;statusCloud('Сохранено в общей квартире')}catch(e){localStorage.setItem('apartment_unsaved_backup',JSON.stringify(db));if(e.status===401)expireCloud();else if(e.status===409){cloudConflict=true;statusCloud('Общие данные изменились на другом телефоне. Ваши правки сохранены локально. Скачайте копию, затем загрузите общие данные и повторите правку');refreshBtn.hidden=false;retryBtn.hidden=true}else{statusCloud('Не сохранено в общей базе: '+e.message+'. Правки остались на этом устройстве');retryBtn.hidden=false}}finally{cloudBusy=false}}
+function importLocalData(){if(!cloudReady||cloudSha!==null)return;if(!confirm('Перенести данные этого устройства в пустую общую базу?'))return;localStorage.setItem('apartment_before_import',JSON.stringify(oldLocal));db=JSON.parse(JSON.stringify(oldLocal));save()}
+async function retryCloud(){if(cloudDirty)await flushCloud();else await loadCloud()}
+async function discardAndRefresh(){if(cloudDirty){if(!confirm('Загрузить общую версию вместо локальных правок? Перед этим скачайте копию данных.'))return;localStorage.setItem('apartment_unsaved_backup',JSON.stringify(db));cloudDirty=false;localStorage.removeItem('apartment_pending')}cloudConflict=false;await loadCloud()}
+function downloadBackup(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='apartment-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function logoutCloud(){if(cloudBusy){statusCloud('Дождитесь окончания сохранения');return}if(cloudDirty&&!confirm('Есть несохранённые правки. Они останутся локально. Выйти?'))return;localStorage.removeItem('apartment_session');sessionStorage.removeItem('apartment_session');cloudToken='';setReady(false);statusCloud('Вы вышли. Введите пароль для доступа к квартире')}
+render();setReady(false);if(cloudToken){if(cloudDirty){setReady(true);flushCloud()}else loadCloud()};
+setInterval(()=>{if(cloudReady&&cloudToken&&!cloudDirty&&!cloudBusy&&!document.hidden)loadCloud()},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cloudToken&&!cloudBusy){if(cloudDirty)flushCloud();else loadCloud()}});
+window.addEventListener('online',()=>{if(cloudToken){if(cloudDirty)flushCloud();else loadCloud()}});
+window.addEventListener('beforeunload',e=>{if(cloudDirty){e.preventDefault();e.returnValue=''}});
 </script>
 </body>
 </html>
